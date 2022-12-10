@@ -87,7 +87,7 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :return: the training losses and accuracies during training
         """
         # Initialize learned parameters
-        self.init_solution(X.shape[1])
+        self.init_solution(X.shape[1]) # returns random w and b = 0
 
         losses = []
         accuracies = []
@@ -96,13 +96,13 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
             losses.append(self.loss(self.w, self.b, self.C, X, y))
             accuracies.append(self.score(X, y))
 
-        permutation = np.random.permutation(len(y))
+        permutation = np.random.permutation(len(y)) # a num between zero to num of sampples
         X = X[permutation, :]
         y = y[permutation]
         
         # Iterate over batches
         for iter in range(0, max_iter):
-            start_idx = (iter * self.batch_size) % X.shape[0]
+            start_idx = (iter * self.batch_size) % X.shape[0] # batch size intialized 32
             end_idx = min(X.shape[0], start_idx + self.batch_size)
             batch_X = X[start_idx:end_idx, :]
             batch_y = y[start_idx:end_idx]
