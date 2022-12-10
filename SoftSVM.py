@@ -65,7 +65,7 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :return: a tuple with (the gradient of the weights, the gradient of the bias)
         """
         # TODO: calculate the analytical sub-gradient of soft-SVM w.r.t w and b
-        margins = (X.dot(w) + b).reshape(-1, 1)                     # x = d*m
+        margins = (X.dot(w) + b).reshape(-1, 1)
         hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
         f = np.where(hinge_inputs < 1, -1, 0)
         fy = np.multiply(f, y.reshape(-1, 1))
