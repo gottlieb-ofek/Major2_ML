@@ -44,13 +44,13 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         """
         margins = (X.dot(w) + b).reshape(-1, 1)
         hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
-
+        max_hinge_inputs = np.maximum(0, 1-hinge_inputs)
+        sum_hinge = np.sum(max_hinge_inputs)
         norm = np.linalg.norm(w)
 
-        # TODO: complete the loss calculation
-        loss = 0.0
+        loss = np.power(norm, 2) + sum_hinge*C
 
-        return
+        return loss
 
     @staticmethod
     def subgradient(w, b: float, C: float, X, y):
@@ -65,9 +65,15 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :return: a tuple with (the gradient of the weights, the gradient of the bias)
         """
         # TODO: calculate the analytical sub-gradient of soft-SVM w.r.t w and b
-        g_w = None
-        g_b = 0.0
-
+        margins = (X.dot(w) + b).reshape(-1, 1)                     # x = d*m
+        hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
+        f = np.where(hinge_inputs < 1, -1, 0)
+        fy = np.multiply(f, y.reshape(-1, 1))
+        fyx = np.multiply(fy,X)
+        sum_fxy = np.sum(fyx)
+        sum_fy = np.sum(fy)
+        g_w = np.multiply(2,w) + np.multiply(C, sum_fxy)
+        g_b = np.multiply(C, sum_fy)
         return g_w, g_b
 
     def fit_with_logs(self, X, y, max_iter: int = 2000, keep_losses: bool = True):
