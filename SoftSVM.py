@@ -19,6 +19,8 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         self.w = None
         self.b = 0.0
 
+        #np.random.seed(42)
+
     # Initialize a random weight vector
     def init_solution(self, n_features: int):
         """
@@ -65,18 +67,22 @@ class SoftSVM(BaseEstimator, ClassifierMixin):
         :return: a tuple with (the gradient of the weights, the gradient of the bias)
         """
         # TODO: calculate the analytical sub-gradient of soft-SVM w.r.t w and b
-        if y.ndim == 2:  # when y is in form (n_samples, 1) instead of (n_samples,) transform it to (n_samples,)
+        if y.ndim == 2:
             y = np.squeeze(np.asarray(y))
+
         margins = (X.dot(w) + b).reshape(-1, 1)
         hinge_inputs = np.multiply(margins, y.reshape(-1, 1))
         f = np.squeeze(np.asarray(np.where(hinge_inputs < 1, -1, 0)))
         fy = np.multiply(f, y)
-        fyx = fy.dot(X)
-        sum_fxy = np.sum(fyx)
-        sum_fy = np.sum(fy)
-        g_w = np.multiply(2,w) + np.multiply(C, sum_fxy)
-        g_b = np.multiply(C, sum_fy)
-        return g_w, g_b
+        fyx = fy.T.dot(X)
+        # changed sum_fyx to fyx
+        g_w = 2 * w + C * fyx
+        g_b = C * np.sum(fy)
+        # CHANGE I only added squeeze
+        # print("g_w squeezed: ", np.squeeze(np.asarray(g_w)))
+        return np.squeeze(np.asarray(g_w)), g_b
+
+
 
     def fit_with_logs(self, X, y, max_iter: int = 2000, keep_losses: bool = True):
         """
